@@ -1,0 +1,37 @@
+
+#first build stage part
+
+FROM node:20 AS builder
+
+WORKDIR /app
+
+
+COPY . .
+
+RUN npm install
+
+RUN echo "Build stage has finished "
+
+
+
+# END build
+
+# test part
+
+FROM builder:20 AS tester
+
+WORKDIR /app
+
+#COPY --from=builder /app/package.json ./
+
+RUN npm test
+
+#END
+
+#stage part
+FROM node:alpine AS stage
+WORKDIR /workshop
+COPY --from=tester /app/server.js server.js
+COPY --from=tester /app/node_modules node_modules 
+
+CMD [ "node", "server.js" ] 
